@@ -8,7 +8,7 @@ Ohjelmointikieli: Python
 
 ## Käytettävät algoritmit
 
-Tavoitteena on vertailla Huffmanin koodausta ja Lempel-Ziv-Welch pakkausmenetelmää. Huffmanin koodauksen toteuttaminen vaati jonon.
+Tavoitteena on vertailla Huffmanin koodausta ja Lempel-Ziv-Welch pakkausmenetelmää. Huffmanin koodauksen toteuttamiseen käytetään minimikekoa ja hajautustaulua (dict).
 
 ## Mitä ongelmaa ratkaistaan
 
@@ -22,7 +22,7 @@ Ohjelman tulisi voida sekä pakata tekstiä, että purkaa jo valmiiksi pakatut t
 
 ## Tavoitetut aikavaativuudet
 
-Huffmanin koodaus on mahdollista toteuttaa ajassa O(nlogn) ja LZW ajassa O(n).
+Huffmanin koodaus on mahdollista toteuttaa ajassa O(nlogn), missä n on eri merkkien määrä, ja LZW ajassa O(n).
 
 ## Lähteet
 
