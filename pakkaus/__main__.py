@@ -2,8 +2,6 @@
 from . import huffman
 import os
 
-import pakkaus
-
 if __name__ == "__main__":
     print("Tämä ohjelma pakkaa ja purkaa tietoa")
     input_string = input("Syötä merkkijono: ")
