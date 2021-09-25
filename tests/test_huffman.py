@@ -1,6 +1,8 @@
-from pakkaus.huffman import HuffmanNode
+import os
 import unittest
+
 from pakkaus import huffman
+from pakkaus.huffman import HuffmanNode, unpack
 
 
 class TestHuffmanNode(unittest.TestCase):
@@ -117,6 +119,80 @@ class TestHuffmanFunctions(unittest.TestCase):
         self.assertEqual(
             big_decoded, "ISO_MERKKIJONO, PALJON ERIKOISI@ MERKKEJÄ ja eri kokoisia merkkejä!!!!?"
         )
+
+    def test_pack(self):
+        dictionary = {
+            104: "0000",
+            105: "0001",
+            106: "0010",
+            117: "0011",
+            50: "01",
+            100: "100",
+            102: "101",
+            103: "110",
+            51: "1110",
+            49: "11110",
+            53: "11111",
+        }
+        data = b"\xf9\xe7\x95\xf9K\xa5\x1caf"
+
+        self.assertEqual(
+            huffman.pack(dictionary, data),
+            b"\x00\x00\x00\x00\x00\x00\x00?h\x040000i\x040001j\x040010u\x0400112\x0201d\x03100f\x03101g\x031103\x0411101\x05111105\x0511111\xf9\xe7\x95\xf9K\xa5\x1caf",
+        )
+
+    def test_unpack(self):
+        packed = b"\x00\x00\x00\x00\x00\x00\x00Nf\x02004\x03010j\x03011s\x0410003\x0410019\x041010g\x041011h\x0411005\x05110108\x0511011v\x041110c\x0511110n\x0511111\x15\xaa\xdc\xaa\x94\xc6^\x17\x8c#\xbd\xdf"
+
+        dictionary, data = huffman.unpack(packed)
+
+        self.assertEqual(
+            dictionary,
+            {
+                102: "00",
+                52: "010",
+                106: "011",
+                115: "1000",
+                51: "1001",
+                57: "1010",
+                103: "1011",
+                104: "1100",
+                53: "11010",
+                56: "11011",
+                118: "1110",
+                99: "11110",
+                110: "11111",
+            },
+        )
+
+        self.assertEqual(data, b"\x15\xaa\xdc\xaa\x94\xc6^\x17\x8c#\xbd\xdf")
+
+    def test_packing_files(self):
+        file_contents = f"""
+            This is a test file
+            for the
+            tir@l@Br@! :))
+            """
+
+        source_file = "AUTOMATED.TEST.FILE.txt"
+        destination_file = "AUTOMATED.TEST.FILE.BIN.HUFFMAN"
+        unpacked_file = "AUTOMATED.TEST.FILE.unpacked.txt"
+
+        with open(source_file, "w") as f:
+            f.write(file_contents)
+
+        huffman.pack_file(source_file, destination_file)
+
+        huffman.unpack_file(destination_file, unpacked_file)
+
+        with open(unpacked_file, "r") as f:
+            unpacked = f.read()
+
+        self.assertEqual(file_contents, unpacked)
+
+        os.remove(source_file)
+        os.remove(destination_file)
+        os.remove(unpacked_file)
 
 
 if __name__ == "__main__":

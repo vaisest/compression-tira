@@ -1,3 +1,4 @@
+"Tämä moduuli toteuttaa Huffmanin koodauksen Tiralabraa varten."
 import heapq
 from collections import Counter
 from dataclasses import dataclass
@@ -143,6 +144,10 @@ def encode_data(data: bytes) -> tuple[dict[int, str], bytes]:
 
 
 def decode_to_string(base_dictionary: dict[int, str], data: bytes) -> str:
+    """
+    Yksinkertainen apufunktio purkaa anetun syötteen ja muuntaa saadut
+    tavut merkkijonoksi. Käyttää funktiota decode_to_data().
+    """
     return decode_to_data(base_dictionary, data).decode("UTF-8")
 
 
@@ -180,3 +185,105 @@ def decode_to_data(base_dictionary: dict[int, str], data: bytes) -> bytes:
             buffer = ""
 
     return result_bytes
+
+
+def pack(dictionary: dict[int, str], data: bytes) -> bytes:
+    """
+    Funktio, joka pakkaa sanakirjan ja datan yhdeksi tavulistaksi.
+    Tavulistassa on alussa 8 tavua (64 bittiä) pitkä kokonaisluku,
+    joka määrittelee sanakirjan tietojen pituuden tavuissa.
+
+    Tämän jälkeen paketissa on sanakirjan tiedot, joissa joka parille on
+    ensin avain yhdessä tavussa, toisena koodin pituus, ja n tavua koodia.
+    """
+    # pakataan muotoon:
+    # sanakirjan pituus 8 tavua, sanakirjan tiedot ensimmäisen 8 tavun perusteella, data...
+    # sanakirjan tiedot ovat [avain1], [pituus1 n], n tavua, [avain2], [pituus2 m], m tavua jne.
+    barray = bytearray()
+
+    # jokainen sanakirjan pari
+    for key, value in dictionary.items():
+        # lisätään alkuun avain, eli kokonaisluku
+        barray.append(key)
+
+        # muutetaan koodi, joka on merkkijono tavuiksi
+        byte_string = value.encode("UTF-8")
+
+        # lisätään toiseksi merkkijonon pituus
+        barray.append(len(byte_string))
+
+        # lisätään loppuun merkkijonon tavut
+        barray += byte_string
+
+    # 64 bittiä/8 tavua pituutta alkuun
+    barray = bytearray(len(barray).to_bytes(8, "big")) + barray
+
+    # lisätään pakettiin itse data
+    barray.extend(data)
+
+    return bytes(barray)
+
+
+def unpack(bytelist: bytes) -> tuple[dict[int, str], bytes]:
+    """
+    Purkaa paketin, jonka pack() teki. Muuttaa siis tavulistan
+    sanakirjaksi ja dataksi.
+    """
+
+    # # luetaan sanakirjan tavujen pituus ensimmäisestä 8 tavusta
+    dict_length = int.from_bytes(bytelist[0:8], "big")
+
+    # valitaan sanakirjan tavut slicellä
+    dict_data = bytelist[8 : dict_length + 8]
+
+    key = 0
+    str_len = 0
+
+    dictionary = {}
+    i = 0
+
+    # ensiksi luetaan avain, sitten sitä seuraava koodin pituus, ja sen jälkeen
+    # itse koodi pituuden perusteella, joka muutetaan merkkijonoksi
+    while i < len(dict_data):
+        key = dict_data[i]
+        str_len = dict_data[i + 1]
+        dictionary[key] = dict_data[i + 2 : i + 2 + str_len].decode("UTF-8")
+        i += 2 + str_len
+
+    return dictionary, bytelist[8 + dict_length :]
+
+
+def pack_file(source_name: str, destination_name: str) -> None:
+    """
+    Avaa tiedoston annetun tiedoston, lukee, koodaa ja pakkaa sen.
+    Pakatut tiedot tallennetaan toiseen annettuun tiedostoon.
+    Koodaus tapahtuu funktiolla encode_data() ja
+    pakkaus funktiolla pack().
+    """
+
+    with open(source_name, "rb") as f:
+        data = f.read()
+
+    dictionary, encoded = encode_data(data)
+    packed = pack(dictionary, encoded)
+
+    with open(destination_name, "wb") as f:
+        f.write(packed)
+
+
+def unpack_file(source_name: str, destination_name: str) -> None:
+    """
+    Avaa funktion pack_file() pakkaaman tiedoston, purkaa sen, ja kääntää sen.
+    Lopuksi käännetty data tallennetaan toiseen annettuun tiedostoon.
+    Purkamisen hoitaa unpack() ja kääntämisen decode_to_data().
+    """
+
+    with open(source_name, "rb") as f:
+        data = f.read()
+
+    dictionary, encoded = unpack(data)
+
+    decoded = decode_to_data(dictionary, encoded)
+
+    with open(destination_name, "wb") as f:
+        f.write(decoded)
