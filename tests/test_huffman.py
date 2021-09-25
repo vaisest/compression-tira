@@ -12,7 +12,7 @@ class TestHuffmanNode(unittest.TestCase):
             right=HuffmanNode(frequency=1, symbol="2", left=None, right=None),
         )
 
-        expected = "\n         12: 2\n        \t 2: 1\n        \t 1: 1\n        "
+        expected = "12: 2\n\t2: 1\n\t1: 1\n"
 
         self.assertEqual(str(tree), expected)
 

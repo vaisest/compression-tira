@@ -1,6 +1,7 @@
 import heapq
 from collections import Counter
 from dataclasses import dataclass
+from textwrap import indent
 from typing import Optional
 
 
@@ -21,18 +22,18 @@ class HuffmanNode:
     def __lt__(self, other) -> bool:
         return (self.frequency, self.symbol) < (other.frequency, other.symbol)
 
-    def __str__(self, level=0) -> None:
+    def __str__(self) -> str:
         # koska SyntaxError: f-string expression part cannot include a backslash:
         tab = "\t"
 
         if not self.left or not self.right:
-            return f"{tab * level} {self.symbol}: {self.frequency}"
+            return f"{self.symbol}: {self.frequency}"
 
-        return f"""
-        {tab * level} {self.symbol}: {self.frequency}
-        {self.right.__str__(level=level + 1)}
-        {self.left.__str__(level=level + 1)}
-        """
+        return (
+            f"{self.symbol}: {self.frequency}\n"
+            + indent(f"{self.right.__str__()}\n", tab)
+            + indent(f"{self.left.__str__()}\n", tab)
+        )
 
 
 def generate_tree(string: str) -> HuffmanNode:
@@ -45,7 +46,7 @@ def generate_tree(string: str) -> HuffmanNode:
     frequencies = Counter(string)
 
     # minimikeko
-    heap = []
+    heap: list[HuffmanNode] = []
 
     # jokaiselle merkille tehdään lehtisolmu, jossa solmun todennäköisyys on
     # merkin määrä tekstissä
@@ -69,9 +70,6 @@ def generate_tree(string: str) -> HuffmanNode:
         # uusi solmu lisätään takaisin kekoon
         heapq.heappush(heap, internal_node)
 
-        first.parent = internal_node
-        second.parent = internal_node
-
     # jäljelle jäävä solmu on puun juuri
     return heap[0]
 
@@ -82,7 +80,7 @@ def generate_dictionary(tree: HuffmanNode) -> dict[str, str]:
     sanakirjaksi.
     """
 
-    codes = {}
+    codes: dict[str, str] = {}
 
     # puu käydään läpi rekursiivisesti ja vasemmalle mentäessä koodiin lisätään 0,
     # ja oikealle mentäessä 1
