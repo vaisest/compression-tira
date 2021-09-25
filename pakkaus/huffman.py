@@ -15,7 +15,7 @@ class HuffmanNode:
     """
 
     frequency: int
-    symbol: str
+    symbol: int
     left: Optional["HuffmanNode"] = None
     right: Optional["HuffmanNode"] = None
 
@@ -27,31 +27,34 @@ class HuffmanNode:
         tab = "\t"
 
         if not self.left or not self.right:
-            return f"{self.symbol}: {self.frequency}"
+            return f"{bin(self.symbol)}: {self.frequency}"
 
         return (
-            f"{self.symbol}: {self.frequency}\n"
+            f"{bin(self.symbol)}: {self.frequency}\n"
             + indent(f"{self.right.__str__()}\n", tab)
             + indent(f"{self.left.__str__()}\n", tab)
         )
 
 
-def generate_tree(string: str) -> HuffmanNode:
+def generate_tree(data: bytes) -> HuffmanNode:
     """
-    Hyväksyy merkkijonon ja palauttaa siitä tehdyn
+    Hyväksyy tavuja ja palauttaa niistä tehdyn
     Huffmanin puun.
     """
 
-    # Counter laskee jokaisen merkin frekvenssin
-    frequencies = Counter(string)
+    # Counter laskee jokaisen tavun frekvenssin
+    # tässä kohtaa tulee huomattua, että bytes on enemmänkin
+    # lista 8-bittisiä kokonaislukuja, joten tyyppi
+    # on dict[int, int]
+    frequencies: dict[int, int] = Counter(data)
 
     # minimikeko
     heap: list[HuffmanNode] = []
 
-    # jokaiselle merkille tehdään lehtisolmu, jossa solmun todennäköisyys on
-    # merkin määrä tekstissä
-    for char, freq in zip(frequencies, frequencies.values()):
-        heapq.heappush(heap, HuffmanNode(freq, char))
+    # jokaiselle merkille tehdään lehtisolmu, jossa solmun
+    # todennäköisyys on kyseisen tavun määrä
+    for byte, freq in zip(frequencies, frequencies.values()):
+        heapq.heappush(heap, HuffmanNode(freq, byte))
 
     while len(heap) > 1:
         # keosta otetaan kaksi pienintä
@@ -74,13 +77,16 @@ def generate_tree(string: str) -> HuffmanNode:
     return heap[0]
 
 
-def generate_dictionary(tree: HuffmanNode) -> dict[str, str]:
+def generate_dictionary(tree: HuffmanNode) -> dict[int, str]:
     """
     Funktio hyväksyy syötteenä Huffmanin puun ja muuttaa sen
     sanakirjaksi.
     """
 
-    codes: dict[str, str] = {}
+    # koodit ovat siis merkkijonoja syystä, että
+    # pythonissa ei vaikuta olevan mitään parempaa
+    # tapaa lisätä bittejä toisiinsa
+    codes: dict[int, str] = {}
 
     # puu käydään läpi rekursiivisesti ja vasemmalle mentäessä koodiin lisätään 0,
     # ja oikealle mentäessä 1
@@ -98,46 +104,79 @@ def generate_dictionary(tree: HuffmanNode) -> dict[str, str]:
     return codes
 
 
-def apply_dictionary_to_string(input_str: str, codes: dict[str, str]) -> str:
-    "Koodaa syötemerkkijonon sanakirjan avulla ja palauttaa bittimerkkijonon."
+def apply_dictionary_to_data(data: bytes, codes: dict[int, str]) -> str:
+    "Koodaa syötetavut sanakirjan avulla ja palauttaa koodatun bittijonon."
 
-    return "".join([codes[char] for char in input_str])
+    return "".join([codes[byte] for byte in data])
 
 
-def encode(string: str) -> tuple[dict[str, str], str]:
+def encode_string(string: str) -> tuple[dict[int, str], bytes]:
+    """
+    Yksinkertainen apufunktio joka muuttaa syötemerkkijonon tavuiksi ja
+    suorittaa funktion encode_data() niillä.
+    """
+    return encode_data(bytes(string, "UTF-8"))
+
+
+def encode_data(data: bytes) -> tuple[dict[int, str], bytes]:
     """
     Apufunktio joka tekee syötemerkkijonolle Huffmanin puun,
     puusta sanakirjan ja koodaa merkkijonon sen avulla.
-    Palauttaa dict-tyypin, joka sisältää sanakirjan, ja bittimerkkijonon.
+    Palauttaa dict-tyypin, joka sisältää sanakirjan, ja bittijonon.
     """
 
-    tree = generate_tree(string)
+    tree = generate_tree(data)
 
     dictionary = generate_dictionary(tree)
 
-    return dictionary, apply_dictionary_to_string(string, dictionary)
+    # bittimerkkijonoon lisätään bitti yksi eteen ettei muunnos
+    # kokonaisluvuksi poista alusta kaikkia nollia
+    encoded_string = "1" + apply_dictionary_to_data(data, dictionary)
+
+    # bittimerkkijono muutetaan kokonaisluvuksi
+    encoded_int = int(encoded_string, 2)
+
+    # kokonaisluku muutetaan tavuiksi
+    encoded_data = encoded_int.to_bytes((encoded_int.bit_length() + 7) // 8, "big")
+
+    return dictionary, encoded_data
 
 
-def decode(dictionary: dict[str, str], string: str) -> str:
+def decode_to_string(base_dictionary: dict[int, str], data: bytes) -> str:
+    return decode_to_data(base_dictionary, data).decode("UTF-8")
+
+
+def decode_to_data(base_dictionary: dict[int, str], data: bytes) -> bytes:
     """
     Purkaa syötebittimerkkijonon annetun sanakirjan
     perusteella ja palauttaa merkkijonon.
     """
 
-    # käännetään sanakirja ympäri eli koodi -> merkki
-    dictionary = {v: k for k, v in dictionary.items()}
+    # käännetään sanakirja ympäri eli koodi -> tavu/kokonaisluku
+    dictionary: dict[str, int] = {code: byte for byte, code in base_dictionary.items()}
 
-    result_string = ""
+    result_bytes = bytearray()
 
+    # pythonissa ei taida olla mitään muuta hyvää
+    # tapaa käsitellä syöte bitti kerrallaan kuin
+    # merkkijonot, joten käytetään taas niitä.
     buffer = ""
 
     # bittejä kerätään kunnes sanakirjasta löytyy vastaava koodi.
     # tämä toimii koska Huffmanin koodauksessa koodien etuliitteitä ei
     # voi sekoittaa vaan koodi löydetään hakemalla bittejä järjestyksessä.
-    for bit in string:
+
+    big_number = int.from_bytes(data, byteorder="big")
+    # muutetaan bytesistä saatu int muotoon
+    # 0b110101, josta poistetaan 0b ja ensimmäinen bitti 1, joka
+    # lisättiin ettei kokonaisluvuksi muunnos poistaisi alusta nollia.
+    # näin voidaan käsitellä bitit yksi kerrallaan
+    bit_string = bin(big_number)[3:]
+
+    for bit in bit_string:
         buffer += bit
         if buffer in dictionary:
-            result_string += dictionary[buffer]
+            result_bytes.append(dictionary[buffer])
             buffer = ""
 
-    return result_string
+    return result_bytes

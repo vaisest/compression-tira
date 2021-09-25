@@ -7,115 +7,115 @@ class TestHuffmanNode(unittest.TestCase):
     def test_printing(self):
         tree = HuffmanNode(
             frequency=2,
-            symbol="12",
-            left=HuffmanNode(frequency=1, symbol="1", left=None, right=None),
-            right=HuffmanNode(frequency=1, symbol="2", left=None, right=None),
+            symbol=99,
+            left=HuffmanNode(frequency=1, symbol=50, left=None, right=None),
+            right=HuffmanNode(frequency=1, symbol=49, left=None, right=None),
         )
 
-        expected = "12: 2\n\t2: 1\n\t1: 1\n"
+        expected = "0b1100011: 2\n\t0b110001: 1\n\t0b110010: 1\n"
 
         self.assertEqual(str(tree), expected)
 
 
 class TestHuffmanFunctions(unittest.TestCase):
     def test_encode(self):
-        dictionary, string = huffman.encode("IUFGIUFGUDFYUY")
-        self.assertEqual(
-            dictionary, {"D": "000", "G": "001", "F": "01", "I": "100", "Y": "101", "U": "11"}
-        )
+        dictionary, string = huffman.encode_string("IUFGIUFGUDFYUY")
+        self.assertEqual(dictionary, {70: "00", 68: "010", 71: "011", 85: "10", 73: "110", 89: "111"})
 
-        self.assertEqual(string, "10011010011001101001110000110111101")
+        self.assertEqual(string, b"\x0e\x87\xa1\xc8\xf7")
 
-        big_dictionary, big_string = huffman.encode(
+        big_dictionary, big_string = huffman.encode_string(
             "IUFGIUFGUDFYUY453845845675464587bndguf348yyhgft84i7hy587t48558hyt8g475IUFGIUFGUDFYUY453845845675464587bndguf348yyhgft84i7hy587t48558hyt8g475"
         )
         self.assertEqual(
             big_dictionary,
             {
-                "t": "0000",
-                "3": "00010",
-                "6": "00011",
-                "D": "001000",
-                "b": "001001",
-                "G": "00101",
-                "I": "00110",
-                "Y": "00111",
-                "U": "0100",
-                "d": "010100",
-                "i": "010101",
-                "f": "01011",
-                "4": "011",
-                "5": "100",
-                "8": "101",
-                "y": "1100",
-                "7": "1101",
-                "n": "111000",
-                "u": "111001",
-                "F": "11101",
-                "g": "11110",
-                "h": "11111",
+                116: "0000",
+                85: "0001",
+                51: "00100",
+                54: "00101",
+                121: "0011",
+                71: "01000",
+                73: "01001",
+                89: "01010",
+                102: "01011",
+                52: "011",
+                53: "100",
+                56: "101",
+                68: "110000",
+                98: "110001",
+                100: "110010",
+                105: "110011",
+                55: "1101",
+                110: "111000",
+                117: "111001",
+                70: "11101",
+                103: "11110",
+                104: "11111",
             },
         )
 
         self.assertEqual(
             big_string,
-            "00110010011101001010011001001110100101010000100011101001110100001110111000001010101110010101110000011110110001100011011100101110100100111100001010011110111001010110001001110111001100111111111001011000010101101010111011111111001001011101000001110110010010111111110000001011111001111011000011001001110100101001100100111010010101000010001110100111010000111011100000101010111001010111000001111011000110001101110010111010010011110000101001111011100101011000100111011100110011111111100101100001010110101011101111111100100101110100000111011001001011111111000000101111100111101100",
+            b"\x14\x8fP\x91\xea\x07\x0e\xa8T\xe1+\x95\xc2\xecer\xee<e\xeeVGL\xff\xe5\x85y\xef\xce]\x07d\xbf0\xbe{\x12=BG\xa8\x1c:\xa1S\x84\xaeW\x0b\xb1\x95\xcb\xb8\xf1\x97\xb9Y\x1d3\xff\x96\x15\xe7\xbf9t\x1d\x92\xfc\xc2\xf9\xec",
         )
 
     def test_decode(self):
         dictionary = {
-            "M": "000",
-            "N": "001",
-            "O": "01",
-            "R": "100",
-            "!": "1010",
-            "E": "1011",
-            "I": "1100",
-            "J": "1101",
-            "K": "111",
+            73: "000",
+            74: "001",
+            77: "010",
+            78: "011",
+            82: "100",
+            75: "101",
+            79: "110",
+            33: "1110",
+            69: "1111",
         }
-        string = "00010111001111111100110101001011010"
+        string = b"\n\xf9h9\xee"
 
-        decoded = huffman.decode(dictionary, string)
+        decoded = huffman.decode_to_string(dictionary, string)
         self.assertEqual(decoded, "MERKKIJONO!")
 
         big_dictionary = {
-            " ": "000",
-            "!": "0010",
-            "A": "00110",
-            "L": "001110",
-            "P": "001111",
-            "E": "0100",
-            "M": "01010",
-            "N": "01011",
-            "S": "01100",
-            "_": "011010",
-            "m": "011011",
-            "a": "01110",
-            "j": "01111",
-            "k": "1000",
-            "o": "10010",
-            "r": "10011",
-            "I": "1010",
-            "K": "1011",
-            "O": "1100",
-            "s": "110100",
-            "Ä": "110101",
-            "J": "11011",
-            "R": "11100",
-            "e": "11101",
-            "i": "11110",
-            "ä": "111110",
-            ",": "1111110",
-            "?": "1111111",
+            164: "00000",
+            77: "00001",
+            33: "0001",
+            69: "0010",
+            107: "0011",
+            78: "01000",
+            83: "01001",
+            97: "01010",
+            106: "01011",
+            44: "011000",
+            63: "011001",
+            111: "01101",
+            114: "01110",
+            64: "011110",
+            65: "011111",
+            76: "100000",
+            80: "100001",
+            195: "10001",
+            95: "100100",
+            109: "100101",
+            115: "100110",
+            132: "100111",
+            73: "1010",
+            75: "1011",
+            79: "1100",
+            74: "11010",
+            82: "11011",
+            101: "11100",
+            105: "11101",
+            32: "1111",
         }
 
-        big_string = "1010011001100011010010100100111001011101110101101111000101111001111110000001111001100011101101111000101100001001110010101011110010100110010100011000001010010011100101110110100110111101010000111101110000111011001111110000100010010100010010111101101001111001110000011011111011001110001000111010111111111000100010001000101111111"
+        big_string = b"4\x9c\x90%\xbb\xba\xd6#\x18\xf8_\x83X\x8f-\xd5\xe5&\x9e\xf0\x96\xee\xcbQ\x9f\xd6\xaf\xe3\xbb\xe6\xd3of\xea\xbe^8\xcf\x8b\x88\x04DY"
 
-        big_decoded = huffman.decode(big_dictionary, big_string)
+        big_decoded = huffman.decode_to_string(big_dictionary, big_string)
         # :D
         self.assertEqual(
-            big_decoded, "ISO_MERKKIJONO, PALJON ERIKOISIA MERKKEJÄ ja eri kokoisia merkkejä!!!!?"
+            big_decoded, "ISO_MERKKIJONO, PALJON ERIKOISI@ MERKKEJÄ ja eri kokoisia merkkejä!!!!?"
         )
 
 
