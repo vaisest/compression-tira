@@ -47,7 +47,7 @@ if __name__ == "__main__":
         simple_ui()
     elif sys.argv[1] in ["c", "compress"]:
         source_file = sys.argv[2]
-        destination_file = sys.argv[2]
+        destination_file = sys.argv[3]
         huffman.pack_file(source_file, destination_file)
         source_size = os.path.getsize(source_file)
         destination_size = os.path.getsize(destination_file)
