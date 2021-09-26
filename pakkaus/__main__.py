@@ -1,8 +1,11 @@
 "Sallii ohjelman käytön komennolla `python -m pakkaus`."
-from . import huffman
+import sys
 import os
 
-if __name__ == "__main__":
+from . import huffman
+
+
+def simple_ui():
     print("Tämä ohjelma pakkaa ja purkaa tietoa")
     input_string = input("Syötä merkkijono: ")
 
@@ -20,7 +23,7 @@ if __name__ == "__main__":
     print(a := huffman.pack(dictionary, encoded_string))
     print(huffman.unpack(a))
 
-    print("Pakataan ja puretaan tiedosto:")
+    print("Pakataan ja puretaan tiedosto")
     source_file = input("Syötä lähdetiedoston nimi:")
     destination_file = input("Syötä kohdetiedoston nimi:")
     print("Pakataan...")
@@ -37,3 +40,19 @@ if __name__ == "__main__":
     print("Puretaan...")
 
     huffman.unpack_file(destination_file, decode_file)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        simple_ui()
+    elif sys.argv[1] in ["c", "compress"]:
+        source_file = sys.argv[2]
+        destination_file = sys.argv[2]
+        huffman.pack_file(source_file, destination_file)
+        source_size = os.path.getsize(source_file)
+        destination_size = os.path.getsize(destination_file)
+        print(
+            f"Alkuperäisen koko: {source_size}, pakatun koko: {destination_size}, pakkaussuhde: {(destination_size/source_size)*100}%."
+        )
+    elif sys.argv[1] in ["u", "uncompress"]:
+        exit()

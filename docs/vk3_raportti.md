@@ -2,9 +2,12 @@
 
 ## Tällä viikolla
 
-Aikaa käytetty: 10 tuntia
+Aikaa käytetty: 11 tuntia
 
-Muutin Huffmanin koodauksen toteutuksen bittipohjaiseksi. Tähän kului paljon enemmän aikaa kuin ajattelin, että siihen menisi, sillä Pythonissa ainoa tavuja käsittelevä tietotyyppi on bytes, mikä on käytännössä lista 8-bittisiä kokonaislukuja. Ensinnäkin tämä vaikeutti yksittäisten bittien prosessointia ja lisäksi koodien muuttaminen kokonaisluvuksi pudotti alusta kaikki nollat, mikä rikkoi koodin. Nyt sanakirja tallennetaan avaimina (kokonaisluku) ja merkkijonoina, koska sen koko silti erittäin pieni. Ja itse koodattu data säilyy kokonaislukuna, koska sen eteen lisätään bitti 1, jottei alun nollat putoa. Epävirallisia tietorakennepaketteja ilmeisesti on, mutta niiden käyttö taitaa olla hieman outoa tira projektissa.
+Muutin Huffmanin koodauksen toteutuksen bittipohjaiseksi. Tähän kului paljon enemmän aikaa kuin ajattelin, että siihen menisi, sillä Pythonissa ainoa tavuja käsittelevä tietotyyppi on bytes, mikä on käytännössä lista 8-bittisiä kokonaislukuja. Ensinnäkin tämä vaikeutti yksittäisten bittien prosessointia ja lisäksi koodien muuttaminen kokonaisluvuksi pudotti alusta kaikki nollat, mikä rikkoi koodin. Ja itse koodattu data säilyy kokonaislukuna, koska sen eteen lisätään bitti 1, jottei alun nollat putoa. Epävirallisia tietorakennepaketteja ilmeisesti on, mutta niiden käyttö taitaa olla hieman outoa tira projektissa.
+
+Aikaisemmin sanakirja tallennetiin avaimina (kokonaisluku) ja merkkijonoina. Nyt jokainen pari tallennetaan muodossa [merkki, koodin bittipituus, koodi kokonaislukuna].
+Pikaisella testillä tämä säästi huimat 2 kilotavua 100 megatavun Wikipedia tekstitiedoston pakkaamisessa, vaikka jokainen sanakirjan pari vie enintään 3-4 tavua. Se voi kuitenkin olla suhteellisen suuri hyöty muun kuin teksin pakkaamisessa.
 
 Ohjelmalla kuitenkin nyt pakkaa ja purkaa sille annetun merkkijonon lisäksi nyt tiedostoja, ja pienen testauksen pohjalta tulokset ovat uskottavia.
 Esimerkiksi Wikipedia-artikkelin koko pieneni noin 35%.  

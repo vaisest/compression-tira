@@ -198,27 +198,29 @@ def pack(dictionary: dict[int, str], data: bytes) -> bytes:
     """
     # pakataan muotoon:
     # sanakirjan pituus 8 tavua, sanakirjan tiedot ensimmäisen 8 tavun perusteella, data...
-    # sanakirjan tiedot ovat [avain1], [pituus1 n], n tavua, [avain2], [pituus2 m], m tavua jne.
+    # sanakirjan tiedot ovat [merkki1, pituus1, koodi1, merkki2, pituus2, koodi2, ...].
     barray = bytearray()
 
     # jokainen sanakirjan pari
-    for key, value in dictionary.items():
+    for symbol, code in dictionary.items():
         # lisätään alkuun avain, eli kokonaisluku
-        barray.append(key)
+        barray.append(symbol)
 
-        # muutetaan koodi, joka on merkkijono tavuiksi
-        byte_string = value.encode("UTF-8")
+        # code on vielä str muotoa "00011010101"
+        bit_length = len(code)
+        # toinen tavu on 8 bittiä/1 tavu koodin bittipituutta
+        barray.extend(len(code).to_bytes(1, "big"))
 
-        # lisätään toiseksi merkkijonon pituus
-        barray.append(len(byte_string))
-
-        # lisätään loppuun merkkijonon tavut
-        barray += byte_string
+        # kolmantena on itse koodi kokonaislukuna
+        # nollat häviävät alusta, mutta ne voidaan lisätä
+        # bittipituuden perusteella takaisin
+        code_int = int(code, 2)
+        barray.extend(code_int.to_bytes((bit_length + 7) // 8, "big"))
 
     # 64 bittiä/8 tavua pituutta alkuun
     barray = bytearray(len(barray).to_bytes(8, "big")) + barray
 
-    # lisätään pakettiin itse data
+    # lisätään pakettiin itse data loppuun
     barray.extend(data)
 
     return bytes(barray)
@@ -230,14 +232,11 @@ def unpack(bytelist: bytes) -> tuple[dict[int, str], bytes]:
     sanakirjaksi ja dataksi.
     """
 
-    # # luetaan sanakirjan tavujen pituus ensimmäisestä 8 tavusta
+    # # luetaan sanakirjan tietojen pituus ensimmäisestä 8 tavusta
     dict_length = int.from_bytes(bytelist[0:8], "big")
 
     # valitaan sanakirjan tavut slicellä
     dict_data = bytelist[8 : dict_length + 8]
-
-    key = 0
-    str_len = 0
 
     dictionary = {}
     i = 0
@@ -246,9 +245,13 @@ def unpack(bytelist: bytes) -> tuple[dict[int, str], bytes]:
     # itse koodi pituuden perusteella, joka muutetaan merkkijonoksi
     while i < len(dict_data):
         key = dict_data[i]
-        str_len = dict_data[i + 1]
-        dictionary[key] = dict_data[i + 2 : i + 2 + str_len].decode("UTF-8")
-        i += 2 + str_len
+        int_bits = dict_data[i + 1]
+        int_bytes = (int_bits + 7) // 8
+        # jako ylös pyöristäen
+        code_int = int.from_bytes(dict_data[i + 2 : i + 2 + int_bytes], "big")
+
+        dictionary[key] = bin(code_int)[2:].zfill(int_bits)
+        i += 2 + int_bytes
 
     return dictionary, bytelist[8 + dict_length :]
 
