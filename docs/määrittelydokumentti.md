@@ -22,10 +22,10 @@ Ohjelman tulisi voida sekä pakata tekstiä, että purkaa jo valmiiksi pakatut t
 
 ## Tavoitetut aikavaativuudet
 
-Huffmanin koodaus on mahdollista toteuttaa ajassa O(nlogn), missä n on eri merkkien määrä, ja LZW ajassa O(n).
+Huffmanin koodaus on mahdollista toteuttaa ajassa O(nlogn + m), missä n on eri merkkien määrä ja m syötteen määrä. Käytännössä rajoittava tekijä on syötteen merkkien laskeminen ja kääntäminen, mikä on yksinkertainen operaatio.
 
 ## Lähteet
 
-* https://en.wikipedia.org/wiki/Huffman_coding
+- https://en.wikipedia.org/wiki/Huffman_coding
 
-* https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch
+- https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch
