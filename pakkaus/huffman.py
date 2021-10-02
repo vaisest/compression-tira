@@ -7,7 +7,7 @@ from typing import Optional
 
 
 @dataclass(order=False)
-class HuffmanNode:
+class _HuffmanNode:
     """
     Solmuluokka, joka toteuttaa Huffmanin puu.
     Solmussa arvo (käytännössä merkin frekvenssi) ja
@@ -17,8 +17,8 @@ class HuffmanNode:
 
     frequency: int
     symbol: int
-    left: Optional["HuffmanNode"] = None
-    right: Optional["HuffmanNode"] = None
+    left: Optional["_HuffmanNode"] = None
+    right: Optional["_HuffmanNode"] = None
 
     def __lt__(self, other) -> bool:
         return (self.frequency, self.symbol) < (other.frequency, other.symbol)
@@ -37,7 +37,7 @@ class HuffmanNode:
         )
 
 
-def generate_tree(data: bytes) -> HuffmanNode:
+def _generate_tree(data: bytes) -> _HuffmanNode:
     """
     Hyväksyy tavuja ja palauttaa niistä tehdyn
     Huffmanin puun.
@@ -50,12 +50,12 @@ def generate_tree(data: bytes) -> HuffmanNode:
     frequencies: dict[int, int] = Counter(data)
 
     # minimikeko
-    heap: list[HuffmanNode] = []
+    heap: list[_HuffmanNode] = []
 
     # jokaiselle merkille tehdään lehtisolmu, jossa solmun
     # todennäköisyys on kyseisen tavun määrä
     for byte, freq in zip(frequencies, frequencies.values()):
-        heapq.heappush(heap, HuffmanNode(freq, byte))
+        heapq.heappush(heap, _HuffmanNode(freq, byte))
 
     while len(heap) > 1:
         # keosta otetaan kaksi pienintä
@@ -64,7 +64,7 @@ def generate_tree(data: bytes) -> HuffmanNode:
 
         # näistä tehdään uusi solmu, jonka lapset ovat nämä kaksi solmua
         # uuden solmun arvo on sen lapsien arvon summa
-        internal_node = HuffmanNode(
+        internal_node = _HuffmanNode(
             first.frequency + second.frequency,
             first.symbol + second.symbol,
             first,
@@ -78,7 +78,7 @@ def generate_tree(data: bytes) -> HuffmanNode:
     return heap[0]
 
 
-def generate_dictionary(tree: HuffmanNode) -> dict[int, str]:
+def _generate_dictionary(tree: _HuffmanNode) -> dict[int, str]:
     """
     Funktio hyväksyy syötteenä Huffmanin puun ja muuttaa sen
     sanakirjaksi.
@@ -92,7 +92,7 @@ def generate_dictionary(tree: HuffmanNode) -> dict[int, str]:
     # puu käydään läpi rekursiivisesti ja vasemmalle mentäessä koodiin lisätään 0,
     # ja oikealle mentäessä 1
     # kun saavutaan lehtisolmuun, koodi lisätään sanakirjaan
-    def recurse(node: HuffmanNode, codes: dict, bits: str) -> None:
+    def recurse(node: _HuffmanNode, codes: dict, bits: str) -> None:
         if node.left and node.right:
             recurse(node.left, codes, bits + "0")
             recurse(node.right, codes, bits + "1")
@@ -105,7 +105,7 @@ def generate_dictionary(tree: HuffmanNode) -> dict[int, str]:
     return codes
 
 
-def apply_dictionary_to_data(data: bytes, codes: dict[int, str]) -> str:
+def _apply_dictionary_to_data(data: bytes, codes: dict[int, str]) -> str:
     "Koodaa syötetavut sanakirjan avulla ja palauttaa koodatun bittijonon."
 
     return "".join([codes[byte] for byte in data])
@@ -126,13 +126,13 @@ def encode_data(data: bytes) -> tuple[dict[int, str], bytes]:
     Palauttaa dict-tyypin, joka sisältää sanakirjan, ja bittijonon.
     """
 
-    tree = generate_tree(data)
+    tree = _generate_tree(data)
 
-    dictionary = generate_dictionary(tree)
+    dictionary = _generate_dictionary(tree)
 
     # bittimerkkijonoon lisätään bitti yksi eteen ettei muunnos
     # kokonaisluvuksi poista alusta kaikkia nollia
-    encoded_string = "1" + apply_dictionary_to_data(data, dictionary)
+    encoded_string = "1" + _apply_dictionary_to_data(data, dictionary)
 
     # bittimerkkijono muutetaan kokonaisluvuksi
     encoded_int = int(encoded_string, 2)

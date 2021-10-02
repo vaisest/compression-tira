@@ -2,16 +2,16 @@ import os
 import unittest
 
 from pakkaus import huffman
-from pakkaus.huffman import HuffmanNode, unpack
+from pakkaus.huffman import _HuffmanNode
 
 
 class TestHuffmanNode(unittest.TestCase):
     def test_printing(self):
-        tree = HuffmanNode(
+        tree = _HuffmanNode(
             frequency=2,
             symbol=99,
-            left=HuffmanNode(frequency=1, symbol=50, left=None, right=None),
-            right=HuffmanNode(frequency=1, symbol=49, left=None, right=None),
+            left=_HuffmanNode(frequency=1, symbol=50, left=None, right=None),
+            right=_HuffmanNode(frequency=1, symbol=49, left=None, right=None),
         )
 
         expected = "0b1100011: 2\n\t0b110001: 1\n\t0b110010: 1\n"

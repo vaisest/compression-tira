@@ -1,2 +1,4 @@
 "Pääpakkaus tiralabran Pakkaus-tira projektille."
-__all__ = ["huffman"]
+from . import huffman
+
+# from . import lz
