@@ -8,7 +8,7 @@ Ohjelmointikieli: Python
 
 ## Käytettävät algoritmit
 
-Tavoitteena on vertailla Huffmanin koodausta ja Lempel-Ziv-Welch pakkausmenetelmää. Huffmanin koodauksen toteuttamiseen käytetään minimikekoa ja hajautustaulua (dict).
+Tavoitteena on vertailla Huffmanin koodausta ja Lempel-Ziv-Welch pakkausmenetelmää. Huffmanin koodauksen toteuttamiseen käytetään minimikekoa ja binääripuuta. Sanakirja tallennetaan hajautustauluksi. LZW käyttää hajautustaulua ja taulukkoa.
 
 ## Mitä ongelmaa ratkaistaan
 
