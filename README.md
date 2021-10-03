@@ -15,9 +15,9 @@ Testikattavuus saadann komennolla `pytest --cov-report term-missing --cov=pakkau
 
 - [Testausdokumentti](docs/testausdokumentti.md)
 
-<!-- * Toteutusdokumentti
+- [Toteutusdokumentti](docs/toteutusdokumentti.md)
 
-* Käyttöohje -->
+<!-- - Käyttöohje -->
 
 ### Viikkoraportit
 
