@@ -168,11 +168,14 @@ class TestHuffmanFunctions(unittest.TestCase):
         self.assertEqual(data, b"\x15\xaa\xdc\xaa\x94\xc6^\x17\x8c#\xbd\xdf")
 
     def test_packing_files(self):
-        file_contents = f"""
+        file_contents = (
+            f"""
             This is a test file
             for the
             tir@l@Br@! :))
             """
+            * 99
+        )
 
         source_file = "AUTOMATED.TEST.FILE.txt"
         destination_file = "AUTOMATED.TEST.FILE.BIN.HUFFMAN"

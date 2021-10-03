@@ -9,7 +9,7 @@ from typing import Optional
 @dataclass(order=False)
 class _HuffmanNode:
     """
-    Solmuluokka, joka toteuttaa Huffmanin puu.
+    Solmuluokka, joka toteuttaa Huffmanin puun.
     Solmussa arvo (käytännössä merkin frekvenssi) ja
     itse merkki ovat pakollisia. Vasen ja oikea alasolmu
     ovat vapaaehtoisia.
