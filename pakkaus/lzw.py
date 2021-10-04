@@ -1,9 +1,4 @@
 "Tämä moduuli toteuttaa LZW-pakkausalgoritmin Tiralabraa varten."
-## tiedosto on pahasti kesken
-
-from typing import Optional, overload
-from dataclasses import dataclass, field
-import copy
 
 
 # # @dataclass
@@ -24,43 +19,50 @@ import copy
 
 
 # class _Trie:
-#     "Toteuttaa Trie-tietorakenteen LZW-algoritmia varten."
+#     "Toteuttaa Trie-tietorakenteen LZW-algoritmia varten tupleja käyttäen."
 
 #     def __init__(self) -> None:
-#         self.root = _TrieNode()
+#         # mypy ei taida tukea rekursiivisia tyyppejä
+#         self.data: Any = [dict(), None]
 #         self.size = 0
 
-#         for i in range(0, 256):
-#             self.insert(i.to_bytes(1, "big"), i.to_bytes(2, "big"))
+#     def __str__(self):
+#         return str(self.data)
 
 #     def get(self, key: bytes) -> bytes:
-#         node = self.root
+#         pair = self.data
 #         for integer in key:
-#             if integer in node.children:
-#                 node = node.children[integer]
+#             if integer in pair[0]:
+#                 pair = pair[0][integer]
 #             else:
-#                 raise KeyError("Trie get method did not find key.")
-#         # mypy valittaa optionalista:
-#         if node.value is None:
-#             raise ValueError()
-#         return node.value
+#                 raise KeyError("Trie get() did not find key.")
+#         # # mypy valittaa optionalista:
+#         # if map.value is None:
+#         #     raise ValueError()
+#         return pair[1]
+
+#     def __getitem__(self, item: bytes) -> bytes:
+#         return self.get(item)
+
+#     def __setitem__(self, key: bytes, value: bytes) -> None:
+#         return self.insert(key, value)
 
 #     def __contains__(self, item: bytes) -> bool:
-#         node = self.root
+#         pair = self.data
 #         for integer in item:
-#             if integer in node.children:
-#                 node = node.children[integer]
+#             if integer in pair[0]:
+#                 pair = pair[0][integer]
 #             else:
 #                 return False
 #         return True
 
 #     def insert(self, key: bytes, value: bytes) -> None:
-#         node = self.root
+#         pair = self.data
 #         for integer in key:
-#             if integer not in node.children:
-#                 node.children[integer] = _TrieNode()
-#             node = node.children[integer]
-#         node.value = value
+#             if integer not in pair[0]:
+#                 pair[0][integer] = [dict(), None]
+#             pair = pair[0][integer]
+#         pair[1] = value
 #         self.size += 1
 
 #     def __len__(self):
@@ -81,6 +83,8 @@ def compress(data: bytes) -> bytes:
     ## Se oli jotenkin vielä hitaampi kuin dict.
     ## Luultavasti koska Pythonin oliot ovat erittäin hitaita ja
     ## dict on osittain optimoitua C-koodia.
+    ## Myös Trie ilman luokkia on noin 2.5 kertaa hitaampi
+    ## kuin dict
     # dictionary = _Trie()
     dictionary = dict()
 
@@ -99,9 +103,9 @@ def compress(data: bytes) -> bytes:
     while len(data) > pointer:
         if dict_size_counter >= DICTIONARY_MAX_SIZE:
             # if len(dictionary) >= DICTIONARY_MAX_SIZE:
-            # dictionary = _Trie()
             del dictionary
             dict_size_counter = 256
+            # dictionary = _Trie()
             dictionary = dict()
             for i in range(0, 256):
                 dictionary[i.to_bytes(1, "big")] = i.to_bytes(2, "big")
