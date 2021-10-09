@@ -3,7 +3,7 @@ import heapq
 from collections import Counter
 from dataclasses import dataclass
 from textwrap import indent
-from typing import Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 
 @dataclass(order=False)
@@ -44,13 +44,16 @@ def _generate_tree(data: bytes) -> _HuffmanNode:
     """
 
     # Counter laskee jokaisen tavun frekvenssin
+    # Käytössä Counter, koska sillä laskeminen on huomattavasti
+    # nopeampaa kuin itse esim defaultdict() rakenteella
+    # luultavasti, koska Counter() on C-koodia
+    frequencies: Dict[int, int] = Counter(data)
     # tässä kohtaa tulee huomattua, että bytes on enemmänkin
     # lista 8-bittisiä kokonaislukuja, joten tyyppi
     # on dict[int, int]
-    frequencies: dict[int, int] = Counter(data)
-
     # minimikeko
-    heap: list[_HuffmanNode] = []
+
+    heap: List[_HuffmanNode] = []
 
     # jokaiselle merkille tehdään lehtisolmu, jossa solmun
     # todennäköisyys on kyseisen tavun määrä
@@ -78,7 +81,7 @@ def _generate_tree(data: bytes) -> _HuffmanNode:
     return heap[0]
 
 
-def _generate_dictionary(tree: _HuffmanNode) -> dict[int, str]:
+def _generate_dictionary(tree: _HuffmanNode) -> Dict[int, str]:
     """
     Funktio hyväksyy syötteenä Huffmanin puun ja muuttaa sen
     sanakirjaksi.
@@ -87,7 +90,12 @@ def _generate_dictionary(tree: _HuffmanNode) -> dict[int, str]:
     # koodit ovat siis merkkijonoja syystä, että
     # pythonissa ei vaikuta olevan mitään parempaa
     # tapaa lisätä bittejä toisiinsa
-    codes: dict[int, str] = {}
+    codes: Dict[int, str] = {}
+
+    # jos puussa on vain yksi solmu, merkkijonon pituus on yksi.
+    # rekursio ei tomi tällöin, joten palautetaa heti, "sanakirja"
+    if not tree.left and not tree.right:
+        return {tree.symbol: "1"}
 
     # puu käydään läpi rekursiivisesti ja vasemmalle mentäessä koodiin lisätään 0,
     # ja oikealle mentäessä 1
@@ -105,26 +113,13 @@ def _generate_dictionary(tree: _HuffmanNode) -> dict[int, str]:
     return codes
 
 
-def _apply_dictionary_to_data(data: bytes, codes: dict[int, str]) -> str:
+def _apply_dictionary_to_data(data: bytes, codes: Dict[int, str]) -> str:
     "Koodaa syötetavut sanakirjan avulla ja palauttaa koodatun bittijonon."
 
     return "".join([codes[byte] for byte in data])
 
 
-def encode_string(string: str) -> tuple[dict[int, str], bytes]:
-    """
-    Yksinkertainen apufunktio joka muuttaa syötemerkkijonon tavuiksi ja
-    suorittaa funktion encode_data() niillä.
-    """
-    return encode_data(bytes(string, "UTF-8"))
-
-
-def encode_data(data: bytes) -> tuple[dict[int, str], bytes]:
-    """
-    Apufunktio joka tekee syötemerkkijonolle Huffmanin puun,
-    puusta sanakirjan ja koodaa merkkijonon sen avulla.
-    Palauttaa dict-tyypin, joka sisältää sanakirjan, ja bittijonon.
-    """
+def _encode_to_dictionary(data: bytes) -> Tuple[Dict[int, str], bytes]:
 
     tree = _generate_tree(data)
 
@@ -143,22 +138,14 @@ def encode_data(data: bytes) -> tuple[dict[int, str], bytes]:
     return dictionary, encoded_data
 
 
-def decode_to_string(base_dictionary: dict[int, str], data: bytes) -> str:
+def _decode_with_dictionary(base_dictionary: Dict[int, str], data: bytes) -> bytes:
     """
-    Yksinkertainen apufunktio purkaa anetun syötteen ja muuntaa saadut
-    tavut merkkijonoksi. Käyttää funktiota decode_to_data().
-    """
-    return decode_to_data(base_dictionary, data).decode("UTF-8")
-
-
-def decode_to_data(base_dictionary: dict[int, str], data: bytes) -> bytes:
-    """
-    Purkaa syötebittimerkkijonon annetun sanakirjan
-    perusteella ja palauttaa merkkijonon.
+    Purkaa tavut annetun sanakirjan
+    perusteella ja palauttaa dekoodatun datan.
     """
 
     # käännetään sanakirja ympäri eli koodi -> tavu/kokonaisluku
-    dictionary: dict[str, int] = {code: byte for byte, code in base_dictionary.items()}
+    dictionary: Dict[str, int] = {code: byte for byte, code in base_dictionary.items()}
 
     result_bytes = bytearray()
 
@@ -187,7 +174,7 @@ def decode_to_data(base_dictionary: dict[int, str], data: bytes) -> bytes:
     return result_bytes
 
 
-def pack(dictionary: dict[int, str], data: bytes) -> bytes:
+def _pack(dictionary: Dict[int, str], data: bytes) -> bytes:
     """
     Funktio, joka pakkaa sanakirjan ja datan yhdeksi tavulistaksi.
     Tavulistassa on alussa 8 tavua (64 bittiä) pitkä kokonaisluku,
@@ -197,7 +184,7 @@ def pack(dictionary: dict[int, str], data: bytes) -> bytes:
     ensin avain yhdessä tavussa, toisena koodin pituus, ja n tavua koodia.
     """
     # pakataan muotoon:
-    # sanakirjan pituus 8 tavua, sanakirjan tiedot ensimmäisen 8 tavun perusteella, data...
+    # [sanakirjan pituus 8 tavua, sanakirjan tiedot ensimmäisen 8 tavun perusteella, data...]
     # sanakirjan tiedot ovat [merkki1, pituus1, koodi1, merkki2, pituus2, koodi2, ...].
     barray = bytearray()
 
@@ -226,9 +213,9 @@ def pack(dictionary: dict[int, str], data: bytes) -> bytes:
     return bytes(barray)
 
 
-def unpack(bytelist: bytes) -> tuple[dict[int, str], bytes]:
+def _unpack(bytelist: bytes) -> Tuple[Dict[int, str], bytes]:
     """
-    Purkaa paketin, jonka pack() teki. Muuttaa siis tavulistan
+    Purkaa paketin, jonka _pack() teki. Muuttaa siis tavut
     sanakirjaksi ja dataksi.
     """
 
@@ -256,37 +243,87 @@ def unpack(bytelist: bytes) -> tuple[dict[int, str], bytes]:
     return dictionary, bytelist[8 + dict_length :]
 
 
+def pack_data(data: Union[bytes, str]) -> bytes:
+    """
+    Funktio, joka koodaa ja pakkaa joko tavuja tai merkkijonon.
+    Tekee siis syötemerkkijonolle Huffmanin puun,
+    puusta sanakirjan, koodaa syötteen sen avulla ja pakkaa
+    sanakirjan ja koodatun datan.
+    Palauttaa tavuja, joissa on pakattuna sanakirja ja koodattu data.
+    """
+
+    if len(data) == 0:
+        raise ValueError("Tyhjä syöte")
+
+    if isinstance(data, str):
+        data = data.encode("UTF-8")
+
+    dictionary, compressed_bytes = _encode_to_dictionary(data)
+
+    packed = _pack(dictionary, compressed_bytes)
+
+    return packed
+
+
+def unpack_data(data: bytes) -> bytes:
+    """
+    Purkaa annetun syötteen funktioilla _unpack() ja
+    _decode_with_dictionary().
+    """
+
+    if len(data) == 0:
+        raise ValueError("Tyhjä syöte")
+
+    dictionary, compressed_bytes = _unpack(data)
+
+    uncompressed = _decode_with_dictionary(dictionary, compressed_bytes)
+
+    return uncompressed
+
+
 def pack_file(source_name: str, destination_name: str) -> None:
     """
     Avaa tiedoston annetun tiedoston, lukee, koodaa ja pakkaa sen.
     Pakatut tiedot tallennetaan toiseen annettuun tiedostoon.
-    Koodaus tapahtuu funktiolla encode_data() ja
-    pakkaus funktiolla pack().
+    Käyttää funktiota pack_data() pakkaamiseen.
     """
 
-    with open(source_name, "rb") as f:
-        data = f.read()
+    try:
+        with open(source_name, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        print(f"Failed to read file {e=}")
+        raise
 
-    dictionary, encoded = encode_data(data)
-    packed = pack(dictionary, encoded)
+    packed = pack_data(data)
 
-    with open(destination_name, "wb") as f:
-        f.write(packed)
+    try:
+        with open(destination_name, "wb") as f:
+            f.write(packed)
+    except OSError as e:
+        print(f"Failed to write file {e=}")
+        raise
 
 
 def unpack_file(source_name: str, destination_name: str) -> None:
     """
     Avaa funktion pack_file() pakkaaman tiedoston, purkaa sen, ja kääntää sen.
     Lopuksi käännetty data tallennetaan toiseen annettuun tiedostoon.
-    Purkamisen hoitaa unpack() ja kääntämisen decode_to_data().
+    Käyttää funktiota unpack_data() purkamiseen.
     """
 
-    with open(source_name, "rb") as f:
-        data = f.read()
+    try:
+        with open(source_name, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        print(f"Failed to read file {e=}")
+        raise
 
-    dictionary, encoded = unpack(data)
+    unpacked = unpack_data(data)
 
-    decoded = decode_to_data(dictionary, encoded)
-
-    with open(destination_name, "wb") as f:
-        f.write(decoded)
+    try:
+        with open(destination_name, "wb") as f:
+            f.write(unpacked)
+    except OSError as e:
+        print(f"Failed to write file {e=}")
+        raise
