@@ -2,8 +2,8 @@
 import sys
 import os
 
-from . import huffman
-from . import lzw
+from pakkaus import huffman
+from pakkaus import lzw
 
 
 def simple_ui():
@@ -24,6 +24,7 @@ def simple_ui():
 def get_help():
     print("Käyttö:")
     print("  python -m pakkaus (huffman|lzw) (compress|uncompress) filename compressed_filename")
+    print()
     sys.exit()
 
 
@@ -40,7 +41,7 @@ if __name__ == "__main__":
 
         if sys.argv[1] in ["h", "huf", "huffman"]:
             huffman.pack_file(source_file, destination_file)
-        if sys.argv[1] in ["lzw", "lempel-ziv-welch"]:
+        elif sys.argv[1] in ["lzw", "lempel-ziv-welch"]:
             lzw.compress_file(source_file, destination_file)
         else:
             get_help()
@@ -66,3 +67,5 @@ if __name__ == "__main__":
             get_help()
 
         print("Purettu")
+    else:
+        get_help()
