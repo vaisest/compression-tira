@@ -7,20 +7,20 @@ vaikkakin kaikki koodi on jo formatoitu blackilla.
 
 Yksikkötestit voidaan suorittaa komennolla `python -m unittest`. Testikattavuus saadann komennolla `pytest --cov-report term-missing --cov=pakkaus tests/`, laadun tarkastus komennolla `pylint pakkaus` ja tyyppitarkastus komennolla `mypy -m pakkaus`.
 
-Projektissa on seuraavat testit:
+Projektissa on seuraavat Huffman testit:
 
 1. test_huffman.test_printing
 
    - Testaa Huffmanin puun tietorakenteen tulostamista.
 
-2. test_huffman.test_encode
+2. test_huffman.test_pack_data
 
    - Testaa tiedon pakkausta yksinkertaisella syötteellä, ja uudestaan suuremmalla syötteellä. Vertailee oletettua ja
-     tuloksena saatua sanakirjaa ja dataa.
+     tuloksena saatua dataa.
 
-3. test_huffman.test_decode
+3. test_huffman.test_unpack_data
 
-   - Testaa tiedon purkamista yksinkertaisella sanakirja- ja datasyötteellä, ja uudestaan suuremmalla syötteellä. Vertailee tuloksena saatua merkkijonoa.
+   - Testaa tiedon purkamista yksinkertaisella pakatulla syötteellä, ja uudestaan suuremmalla syötteellä. Vertailee tuloksena saatua merkkijonoa.
 
 4. test_huffman.test_pack
 
@@ -31,8 +31,14 @@ Projektissa on seuraavat testit:
    - Testaa pakatun sanakirjan ja datan purkamista.
 
 6. test_huffman.test_packing_files
-   - Testaa tiedoston pakkaamista ja purkamista. Varmistaa, että alkuperäinen tiedosto
-     ja lopputulos ovat sama.
+
+   - Testaa tiedoston pakkaamista ja purkamista. Varmistaa, että alkuperäinen tiedosto ja lopputulos ovat sama.
+
+Ja seuraavat LZW testit:
+
+1. test_lzw.test_compressing_files
+
+   - Testaa suuren tiedoston pakkausta ja purkamista. Varmistaa, että alkuperäinen tiedosto ja lopputulos ovat sama.
 
 ### Testikattavuus
 

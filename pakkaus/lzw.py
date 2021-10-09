@@ -1,12 +1,12 @@
 "Tämä moduuli toteuttaa LZW-pakkausalgoritmin Tiralabraa varten."
 
 
-# # @dataclass
-# # class _TrieNode:
-# #     "Dataclass Trie-luokan solmuja varten."
+# @dataclass
+# class _TrieNode:
+#     "Dataclass Trie-luokan solmuja varten."
 
-# #     children: dict[int, "_TrieNode"] = field(default_factory=dict)
-# #     value: Optional[bytes] = None
+#     children: dict[int, "_TrieNode"] = field(default_factory=dict)
+#     value: Optional[bytes] = None
 
 
 # class _TrieNode:
@@ -79,12 +79,12 @@ def compress(data: bytes) -> bytes:
     data = bytearray(data)
 
     DICTIONARY_MAX_SIZE = 2 ** 16
-    ## Testissä oli Trie tietorakenne hitauden selvittämiseksi
-    ## Se oli jotenkin vielä hitaampi kuin dict.
-    ## Luultavasti koska Pythonin oliot ovat erittäin hitaita ja
-    ## dict on osittain optimoitua C-koodia.
-    ## Myös Trie ilman luokkia on noin 2.5 kertaa hitaampi
-    ## kuin dict
+    # Testissä oli Trie tietorakenne hitauden selvittämiseksi
+    # Se oli jotenkin vielä hitaampi kuin dict.
+    # Luultavasti koska Pythonin oliot ovat erittäin hitaita ja
+    # dict on osittain optimoitua C-koodia.
+    # Myös Trie ilman luokkia on noin 2.5 kertaa hitaampi
+    # kuin dict
     # dictionary = _Trie()
     dictionary = dict()
 
