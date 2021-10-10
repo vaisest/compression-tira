@@ -10,6 +10,8 @@ Testit voidaan suorittaa komennolla `python -m unittest`. Testikattavuuteen käy
 Hyvä tapa asentaa molemmat on tehdä uusi virtuaaliympäristö `python -m venv env` ja aktivoida se. (Linux Bash: `source env/bin/activate` ja Windows `env/Scripts/Activate.ps1`) Tämän jälkeen tarvittavat pakkaukset voidaan asentaa komennolla `pip install -r requirements.txt`
 Testikattavuus saadann komennolla `pytest --cov-report term-missing --cov=pakkaus tests/`, laadun tarkastus komennolla `pylint pakkaus` ja tyyppitarkastus komennolla `mypy pakkaus`.
 
+Ohjelman käyttö on yksinkertaista komennolla: `python -m pakkaus (huffman|lzw) (pakkaa|pura) tiedostonimi kohdetiedostonimi`. Esimerkiksi komento `python -m pakkaus huffman pakkaa tiedosto.txt tiedosto.txt.lzw` pakkaa tiedosto.txt:n tiedostoon tiedosto.txt.lzw.
+
 - [Määrittelydokumentti](docs/määrittelydokumentti.md)
 
 - [Testausdokumentti](docs/testausdokumentti.md)

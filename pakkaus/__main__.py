@@ -33,7 +33,7 @@ if __name__ == "__main__":
         simple_ui()
     elif sys.argv[2] in ["-h", "--help"]:
         get_help()
-    elif sys.argv[2] in ["c", "compress"]:
+    elif sys.argv[2] in ["c", "compress", "pakkaus", "pakkaa"]:
         source_file = sys.argv[3]
         destination_file = sys.argv[4]
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             f"Alkuperäisen koko: {source_size} tavua, pakatun koko: {destination_size} tavua, pakkaussuhde: {(destination_size/source_size)*100}%."
         )
 
-    elif sys.argv[2] in ["u", "uncompress"]:
+    elif sys.argv[2] in ["u", "uncompress", "purku", "pura"]:
         source_file = sys.argv[3]
         destination_file = sys.argv[4]
         print("Puretaan...")
