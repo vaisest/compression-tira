@@ -1,5 +1,5 @@
 "Tämä moduuli toteuttaa LZW-pakkausalgoritmin Tiralabraa varten."
-
+import multiprocessing
 
 # @dataclass
 # class _TrieNode:
@@ -70,6 +70,33 @@
 
 
 def compress(data: bytes) -> bytes:
+    amount = -(-len(data) // 1_000_000)
+    print(amount)
+    if amount < 3:
+        return b"\x00" + _compress(data)
+
+    mega = 1_000_000
+    # TODO: add markers for uncompression slices
+    slices = []
+
+    for x in range(0, amount):
+        print("added", x * mega, (x + 1) * mega)
+        slices.append(data[x * mega : (x + 1) * mega])
+
+    print("a")
+    with multiprocessing.Pool(12) as p:
+        print("b")
+        results = p.map(_compress, slices)
+        print("b")
+
+    # result_bytes = b"\xFF" + b"".join(results)
+
+    # print(result_bytes)
+
+    return b"\xFF" + b"".join(results)
+
+
+def _compress(data: bytes) -> bytes:
     """
     Pakkaa annetun bytes-rakenteen LZW-algoritmilla.
     """
@@ -77,6 +104,8 @@ def compress(data: bytes) -> bytes:
     # koska bytes konkatenaatio on hidasta,
     # käytetään bytearrayita
     data = bytearray(data)
+
+    byte_cutoff = 0
 
     DICTIONARY_MAX_SIZE = 2 ** 16
     # Testissä oli Trie tietorakenne hitauden selvittämiseksi
@@ -102,7 +131,10 @@ def compress(data: bytes) -> bytes:
     # itse algoritmi
     while len(data) > pointer:
         if dict_size_counter >= DICTIONARY_MAX_SIZE:
+            # return
             # if len(dictionary) >= DICTIONARY_MAX_SIZE:
+            print(pointer, pointer - byte_cutoff)
+            byte_cutoff = pointer
             del dictionary
             dict_size_counter = 256
             # dictionary = _Trie()
@@ -131,6 +163,30 @@ def compress(data: bytes) -> bytes:
 
 
 def uncompress(data: bytes) -> bytes:
+    identifier = data[0]
+    data = data[1:]
+    print(identifier)
+    if identifier == 0:
+        return _uncompress(data)
+
+    mega = 1_000_000
+
+    slices = []
+
+    for x in range(0, (len(data) // mega) + 1):
+        print("added", x * mega, (x + 1) * mega)
+        slices.append(data[x * mega : (x + 1) * mega])
+
+    print("a")
+    with multiprocessing.Pool(12) as p:
+        print("b")
+        results = p.map(_uncompress, slices)
+        print("b")
+
+    return b"".join(results)
+
+
+def _uncompress(data: bytes) -> bytes:
     """
     Purkaa annetun LZW-pakatun bytes rakenteen.
     Toisin kuin compress(), tämän funktion
