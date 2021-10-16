@@ -21,6 +21,9 @@ class TestHuffmanNode(unittest.TestCase):
 
 class TestPublicFunctions(unittest.TestCase):
     def test_pack_data(self):
+        little_data = huffman.pack_data(b"B")
+        self.assertEqual(little_data, b"\x00\x00\x00\x00\x00\x00\x00\x03B\x01\x01\x03")
+
         data = huffman.pack_data("IUFGIUFGUDFYUY")
         self.assertEqual(
             data,
@@ -36,7 +39,14 @@ class TestPublicFunctions(unittest.TestCase):
             b"\x00\x00\x00\x00\x00\x00\x00Bt\x04\x00U\x04\x013\x05\x046\x05\x05y\x04\x03G\x05\x08I\x05\tY\x05\nf\x05\x0b4\x03\x035\x03\x048\x03\x05D\x060b\x061d\x062i\x0637\x04\rn\x068u\x069F\x05\x1dg\x05\x1eh\x05\x1f\x14\x8fP\x91\xea\x07\x0e\xa8T\xe1+\x95\xc2\xecer\xee<e\xeeVGL\xff\xe5\x85y\xef\xce]\x07d\xbf0\xbe{\x12=BG\xa8\x1c:\xa1S\x84\xaeW\x0b\xb1\x95\xcb\xb8\xf1\x97\xb9Y\x1d3\xff\x96\x15\xe7\xbf9t\x1d\x92\xfc\xc2\xf9\xecH\xf5\t\x1e\xa0p\xea\x85N\x12\xb9\\.\xc6W.\xe3\xc6^\xe5dt\xcf\xfeXW\x9e\xfc\xe5\xd0vK\xf3\x0b\xe7\xb1#\xd4$z\x81\xc3\xaa\x158J\xe5p\xbb\x19\\\xbb\x8f\x19{\x95\x91\xd3?\xf9a^{\xf3\x97A\xd9/\xcc/\x9e\xc4\x8fP\x91\xea\x07\x0e\xa8T\xe1+\x95\xc2\xecer\xee<e\xeeVGL\xff\xe5\x85y\xef\xce]\x07d\xbf0\xbe{\x12=BG\xa8\x1c:\xa1S\x84\xaeW\x0b\xb1\x95\xcb\xb8\xf1\x97\xb9Y\x1d3\xff\x96\x15\xe7\xbf9t\x1d\x92\xfc\xc2\xf9\xecH\xf5\t\x1e\xa0p\xea\x85N\x12\xb9\\.\xc6W.\xe3\xc6^\xe5dt\xcf\xfeXW\x9e\xfc\xe5\xd0vK\xf3\x0b\xe7\xb1#\xd4$z\x81\xc3\xaa\x158J\xe5p\xbb\x19\\\xbb\x8f\x19{\x95\x91\xd3?\xf9a^{\xf3\x97A\xd9/\xcc/\x9e\xc4\x8fP\x91\xea\x07\x0e\xa8T\xe1+\x95\xc2\xecer\xee<e\xeeVGL\xff\xe5\x85y\xef\xce]\x07d\xbf0\xbe{\x12=BG\xa8\x1c:\xa1S\x84\xaeW\x0b\xb1\x95\xcb\xb8\xf1\x97\xb9Y\x1d3\xff\x96\x15\xe7\xbf9t\x1d\x92\xfc\xc2\xf9\xec",
         )
 
+        empty_data = bytes()
+        self.assertRaises(ValueError, huffman.pack_data, empty_data)
+
     def test_unpack_data(self):
+        little_data = b"\x00\x00\x00\x00\x00\x00\x00\x03B\x01\x01\x03"
+        little_decoded_str = huffman.unpack_data(little_data)
+        self.assertEqual(little_decoded_str, b"B")
+
         data = b"\x00\x00\x00\x00\x00\x00\x00\x1bI\x03\x00J\x03\x01M\x03\x02N\x03\x03R\x03\x04K\x03\x05O\x03\x06!\x04\x0eE\x04\x0f\n\xf9h9\xee"
 
         decoded_str = huffman.unpack_data(data).decode("UTF-8")
@@ -50,6 +60,9 @@ class TestPublicFunctions(unittest.TestCase):
             big_decoded_str,
             "ISO_MERKKIJONO, PALJON ERIKOISI@ MERKKEJÄ ja eri kokoisia merkkejä!!!!?" * 5,
         )
+
+        empty_data = bytes()
+        self.assertRaises(ValueError, huffman.unpack_data, empty_data)
 
     def test_packing_files(self):
         file_contents = (
@@ -76,6 +89,16 @@ class TestPublicFunctions(unittest.TestCase):
             unpacked = f.read()
 
         self.assertEqual(file_contents, unpacked)
+
+        hopefully_inexistent_file = "AUTOMATED.INEXISTENT.FILE.TXT.LONG.EXTENSION"
+
+        self.assertRaises(OSError, huffman.pack_file, hopefully_inexistent_file, unpacked_file)
+
+        self.assertRaises(OSError, huffman.pack_file, source_file, "")
+
+        self.assertRaises(OSError, huffman.unpack_file, hopefully_inexistent_file, unpacked_file)
+
+        self.assertRaises(OSError, huffman.unpack_file, destination_file, "")
 
         os.remove(source_file)
         os.remove(destination_file)

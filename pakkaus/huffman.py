@@ -95,7 +95,7 @@ def _generate_dictionary(tree: _HuffmanNode) -> Dict[int, str]:
     codes: Dict[int, str] = {}
 
     # jos puussa on vain yksi solmu, merkkijonon pituus on yksi.
-    # rekursio ei tomi tällöin, joten palautetaa heti, "sanakirja"
+    # rekursio ei toimi tällöin, joten palautetaan heti 1
     if not tree.left and not tree.right:
         return {tree.symbol: "1"}
 
