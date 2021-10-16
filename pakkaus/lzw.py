@@ -76,7 +76,6 @@ def compress(data: bytes) -> bytes:
 
     # koska bytes konkatenaatio on hidasta,
     # käytetään bytearrayita
-    data = bytearray(data)
 
     DICTIONARY_MAX_SIZE = 2 ** 16
     # Testissä oli Trie tietorakenne hitauden selvittämiseksi
@@ -94,15 +93,17 @@ def compress(data: bytes) -> bytes:
 
     results: list[bytes] = list()
 
-    word = bytearray()
+    word = bytes()
 
     pointer = 0
+    # jostain syystä tämä on nopeampi kuin
+    # len(dictionary), vaikka dict kyllä
+    # pitää lukua itse
     dict_size_counter = 256
 
     # itse algoritmi
     while len(data) > pointer:
         if dict_size_counter >= DICTIONARY_MAX_SIZE:
-            # if len(dictionary) >= DICTIONARY_MAX_SIZE:
             del dictionary
             dict_size_counter = 256
             # dictionary = _Trie()
@@ -111,21 +112,19 @@ def compress(data: bytes) -> bytes:
                 dictionary[i.to_bytes(1, "big")] = i.to_bytes(2, "big")
 
         byte = data[pointer : pointer + 1]
-        if bytes(word + byte) in dictionary:
-            word.extend(byte)
-        else:
-            # fnd = dictionary.get(string)
-            # results.append(fnd)
-            results.append(dictionary[bytes(word)])
 
-            # dictionary.insert(string + char, len(dictionary).to_bytes(2, "big"))
-            dictionary[bytes(word + byte)] = len(dictionary).to_bytes(2, "big")
+        if word + byte in dictionary:
+            word = word + byte
+        else:
+            results.append(dictionary[word])
+
+            dictionary[word + byte] = dict_size_counter.to_bytes(2, "big")
+
             dict_size_counter += 1
             word = byte
         pointer += 1
 
-    # results.append(dictionary.get(string))
-    results.append(dictionary[bytes(word)])
+    results.append(dictionary[word])
 
     return b"".join(results)
 
@@ -137,19 +136,12 @@ def uncompress(data: bytes) -> bytes:
     nopeus pitäisi olla hyväksyttävää.
     """
 
-    # koska bytesin konkatenaatio on erittäin hidasta,
-    data = bytearray(data)
-
     DICTIONARY_MAX_SIZE = 2 ** 16
 
     # sanakirjana käytetään pelkkää listaa
     dictionary: list[bytearray] = list()
     for i in range(0, 256):
-        dictionary.append(bytearray(i.to_bytes(1, "big")))
-
-    # lista tallennetaan muuttujaan, josta se voidaan
-    # kopioida takaisin, kun se sanakirja pitää tyhjentää
-    # original_dictionary = copy.deepcopy(dictionary)
+        dictionary.append(i.to_bytes(1, "big"))
 
     output: list[bytearray] = list()
 
@@ -159,6 +151,7 @@ def uncompress(data: bytes) -> bytes:
 
     for i in range(2, len(data) - 1, 2):
 
+        # konkatenaatio
         code = (data[i] << 8) | data[i + 1]
         if code < len(dictionary):
             output.append(dictionary[code])
@@ -173,8 +166,7 @@ def uncompress(data: bytes) -> bytes:
         if len(dictionary) == DICTIONARY_MAX_SIZE:
             dictionary.clear()
             for i in range(0, 256):
-                dictionary.append(bytearray(i.to_bytes(1, "big")))
-                # dictionary.append(i.to_bytes(1, "big"))
+                dictionary.append(i.to_bytes(1, "big"))
 
     return b"".join(output)
 

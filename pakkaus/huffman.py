@@ -51,14 +51,16 @@ def _generate_tree(data: bytes) -> _HuffmanNode:
     # tässä kohtaa tulee huomattua, että bytes on enemmänkin
     # lista 8-bittisiä kokonaislukuja, joten tyyppi
     # on dict[int, int]
-    # minimikeko
 
+    # minimikeko
     heap: List[_HuffmanNode] = []
 
     # jokaiselle merkille tehdään lehtisolmu, jossa solmun
     # todennäköisyys on kyseisen tavun määrä
     for byte, freq in zip(frequencies, frequencies.values()):
-        heapq.heappush(heap, _HuffmanNode(freq, byte))
+        heap.append(_HuffmanNode(freq, byte))
+
+    heapq.heapify(heap)
 
     while len(heap) > 1:
         # keosta otetaan kaksi pienintä
