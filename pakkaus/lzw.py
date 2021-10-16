@@ -94,11 +94,11 @@ def uncompress(data: bytes) -> bytes:
 
     # sanakirjana käytetään pelkkää listaa
     # itse alkusanakirja on sama kuin pakkauksessa
-    dictionary: list[bytearray] = list()
+    dictionary: list[bytes] = list()
     for i in range(0, 256):
         dictionary.append(i.to_bytes(1, "big"))
 
-    output: list[bytearray] = list()
+    output: list[bytes] = list()
 
     # kahden tavun konkatenaatio
     last_code = (data[0] << 8) | data[1]
