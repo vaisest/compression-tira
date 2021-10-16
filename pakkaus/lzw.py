@@ -1,81 +1,18 @@
 "Tämä moduuli toteuttaa LZW-pakkausalgoritmin Tiralabraa varten."
+from typing import Union
 
 
-# @dataclass
-# class _TrieNode:
-#     "Dataclass Trie-luokan solmuja varten."
-
-#     children: dict[int, "_TrieNode"] = field(default_factory=dict)
-#     value: Optional[bytes] = None
-
-
-# class _TrieNode:
-#     "class Trie-luokan solmuja varten."
-#     __slots__ = "children", "value"
-
-#     def __init__(self) -> None:
-#         self.children: dict[int, _TrieNode] = dict()
-#         self.value: Optional[bytes] = None
-
-
-# class _Trie:
-#     "Toteuttaa Trie-tietorakenteen LZW-algoritmia varten tupleja käyttäen."
-
-#     def __init__(self) -> None:
-#         # mypy ei taida tukea rekursiivisia tyyppejä
-#         self.data: Any = [dict(), None]
-#         self.size = 0
-
-#     def __str__(self):
-#         return str(self.data)
-
-#     def get(self, key: bytes) -> bytes:
-#         pair = self.data
-#         for integer in key:
-#             if integer in pair[0]:
-#                 pair = pair[0][integer]
-#             else:
-#                 raise KeyError("Trie get() did not find key.")
-#         # # mypy valittaa optionalista:
-#         # if map.value is None:
-#         #     raise ValueError()
-#         return pair[1]
-
-#     def __getitem__(self, item: bytes) -> bytes:
-#         return self.get(item)
-
-#     def __setitem__(self, key: bytes, value: bytes) -> None:
-#         return self.insert(key, value)
-
-#     def __contains__(self, item: bytes) -> bool:
-#         pair = self.data
-#         for integer in item:
-#             if integer in pair[0]:
-#                 pair = pair[0][integer]
-#             else:
-#                 return False
-#         return True
-
-#     def insert(self, key: bytes, value: bytes) -> None:
-#         pair = self.data
-#         for integer in key:
-#             if integer not in pair[0]:
-#                 pair[0][integer] = [dict(), None]
-#             pair = pair[0][integer]
-#         pair[1] = value
-#         self.size += 1
-
-#     def __len__(self):
-#         return self.size
-
-
-def compress(data: bytes) -> bytes:
+def compress(data: Union[bytes, str]) -> bytes:
     """
-    Pakkaa annetun bytes-rakenteen LZW-algoritmilla.
+    Pakkaa annetun bytesin tai merkkijonon LZW-algoritmilla ja
+    palauttaa sen bytes-rakenteessa.
     """
 
-    # koska bytes konkatenaatio on hidasta,
-    # käytetään bytearrayita
+    if len(data) == 0:
+        raise ValueError("Tyhjä syöte")
+
+    if isinstance(data, str):
+        data = data.encode("UTF-8")
 
     DICTIONARY_MAX_SIZE = 2 ** 16
     # Testissä oli Trie tietorakenne hitauden selvittämiseksi
@@ -141,10 +78,12 @@ def compress(data: bytes) -> bytes:
 
 def uncompress(data: bytes) -> bytes:
     """
-    Purkaa annetun LZW-pakatun bytes rakenteen.
-    Toisin kuin compress(), tämän funktion
-    nopeus pitäisi olla hyväksyttävää.
+    Purkaa annetun LZW-pakatun bytes-rakenteen
+    ja palauttaa puretun bytes-rakenteen.
     """
+
+    if len(data) == 0:
+        raise ValueError("Tyhjä syöte")
 
     # LZW:n purkaminen toimii, koska
     # koodeista voidaan rakentaa syöte
@@ -207,13 +146,21 @@ def compress_file(source_name: str, destination_name: str) -> None:
     Pakkauksen tekee funktio compress().
     """
 
-    with open(source_name, "rb") as f:
-        data = f.read()
+    try:
+        with open(source_name, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        print(f"Failed to read file {e=}")
+        raise
 
     compressed = compress(data)
 
-    with open(destination_name, "wb") as f:
-        f.write(compressed)
+    try:
+        with open(destination_name, "wb") as f:
+            f.write(compressed)
+    except OSError as e:
+        print(f"Failed to write file {e=}")
+        raise
 
 
 def uncompress_file(source_name: str, destination_name: str) -> None:
@@ -223,10 +170,18 @@ def uncompress_file(source_name: str, destination_name: str) -> None:
     Purkamisen hoitaa uncompress().
     """
 
-    with open(source_name, "rb") as f:
-        data = f.read()
+    try:
+        with open(source_name, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        print(f"Failed to read file {e=}")
+        raise
 
     uncompressed = uncompress(data)
 
-    with open(destination_name, "wb") as f:
-        f.write(uncompressed)
+    try:
+        with open(destination_name, "wb") as f:
+            f.write(uncompressed)
+    except OSError as e:
+        print(f"Failed to write file {e=}")
+        raise
