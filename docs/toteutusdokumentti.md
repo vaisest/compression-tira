@@ -26,4 +26,4 @@ Mielestäni projektin kielen valinta oli melko huono. En ole itse enään löyt�
 
 Itse algoritmeissa voisi tehdä pieniä parannuksia. LZW voisi jättää pakkamatta huonosti pakkautuvat tiedostot ja se saattaisikin olla yksinkertaista toteuttaa.
 
-LZW voisi käyttää vaihtuvia bittimääriä. Tällä hetkellä koodi saattaa tarvita 9 bittiä, mutta se tallennetaan kahteen tavuun. En yrittänyt toteuttaa tätä, sillä ohjelma vaikutti jo liian hitaalta, eikä se säästä suuria määriä tilaa.
+LZW voisi käyttää vaihtuvia bittimääriä. Tällä hetkellä koodi saattaa tarvita 9 bittiä, mutta se tallennetaan kahteen tavuun. En yrittänyt toteuttaa tätä, sillä ohjelma vaikutti jo liian hitaalta, eikä se säästä suuria määriä tilaa

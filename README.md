@@ -18,7 +18,7 @@ Ohjelman käyttö on yksinkertaista komennolla: `python -m pakkaus (huffman|lzw)
 
 - [Toteutusdokumentti](docs/toteutusdokumentti.md)
 
-<!-- - Käyttöohje -->
+<!-- - Käyttöohje ylhäällä -->
 
 ### Viikkoraportit
 
