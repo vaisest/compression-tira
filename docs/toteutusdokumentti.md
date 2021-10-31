@@ -10,10 +10,20 @@ LZW:n pakkaus käyttää hajautustaulua, jonka avulla koodit muodostetaan. Purka
 
 ## Saavutetut aikavaativuudet
 
-Huffmanin koodaus toimii ajassa O(nlogn + m), missä n on eri merkkien määrä ja m syötteen merkkien määrä. Käytännössä rajoittava tekijä m on syötteen merkkien laskeminen ja kääntäminen, mikä on yksinkertainen operaatio ja jossa Pythonin hitaus vaikuttaa nopeuteen suuresti.
+Huffmanin koodaus toimii ajassa O(nlogn + m), missä n on eri merkkien määrä ja m syötteen merkkien määrä. Koska tavulla voi olla vain 2^8 eri arvoa, n on rajoitettu. Käytännössä rajoittava tekijä m on syötteen merkkien laskeminen ja kääntäminen, mikä on yksinkertainen operaatio ja jossa Pythonin hitaus vaikuttaa nopeuteen suuresti.
 
 LZW toimii ajassa O(n), missä n on syötteen määrä. Huffmaniin verrattuna jokaiselle merkille tehty operaatio on monimutkaisempi, joten vaikka algoritmi toimii lineaarisessa ajassa, se on silti suhteellisen hidas, luultavasti Pythonin hitauden takia, sillä profilointi näyttää hitauden olevan todella yksinkertaisissa operaatioissa.
 
 ## Saavutettu tehokkuus
 
 Testissä on [enwik8-tiedosto](https://cs.fit.edu/~mmahoney/compression/textdata.html), mikä on 100MB Wikipediasta otettua XML tekstiä. Huffmanin koodaus saavuttaa 64% pakkaussuhteen ja koodaus vie noin 11 sekuntia aikaa. LZW:n pakkaussuhde on 48% ja se vie 54 sekuntia. Vertauksena Linuxin [ncompress](https://github.com/vapier/ncompress) käyttää LZW:tä ja saavuttaa 46% pakkaussuhteen ajassa 4 sekuntia. Ja modernina algoritmina [Zstd](https://github.com/facebook/zstd):n pakkaussuhde on 35.6% alle yhdessä sekunnissa oletusasetuksilla.
+
+Lisää tehokkuustestausta löytyy [testausdokumentista](testausdokumentti.md).
+
+## Puutteita
+
+Mielestäni projektin kielen valinta oli melko huono. En ole itse enään löytänyt kunnon tapaa parantaa ohjelman nopeutta, ja Python on muutenin tunnetusti huono valinta lähes mille tahansa intensiiviselle prosessoinnille, missä ei käytetä valmista C-moduulia, kuten numpya.
+
+Itse algoritmeissa voisi tehdä pieniä parannuksia. LZW voisi jättää pakkamatta huonosti pakkautuvat tiedostot ja se saattaisikin olla yksinkertaista toteuttaa.
+
+LZW voisi käyttää vaihtuvia bittimääriä. Tällä hetkellä koodi saattaa tarvita 9 bittiä, mutta se tallennetaan kahteen tavuun. En yrittänyt toteuttaa tätä, sillä ohjelma vaikutti jo liian hitaalta, eikä se säästä suuria määriä tilaa.
